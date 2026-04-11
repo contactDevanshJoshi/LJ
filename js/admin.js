@@ -30,7 +30,8 @@ window.addStudent = async function () {
     name,
     department: dept,
     semester: sem,
-    hodName: hod
+    hodName: hod, 
+    enrollment: enroll
   });
 
   alert("Student Added ✅");
