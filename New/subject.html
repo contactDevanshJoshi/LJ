@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:#0f172a;
+  color:#fff;
+}
+
+/* Header */
+.header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:20px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.back{
+  background:#1e293b;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* Content */
+.content{
+  padding:20px;
+  padding-bottom:100px;
+}
+
+/* Card */
+.card{
+  background:#1e293b;
+  border-radius:12px;
+  padding:16px;
+  margin-bottom:20px;
+}
+
+.small{color:#94a3b8;font-size:12px}
+
+/* Phases */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.phase{
+  background:#1e293b;
+  padding:20px;
+  text-align:center;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.phase:active{
+  background:#22c55e20;
+}
+
+/* Nav */
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:#1e293b;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+}
+
+.nav div{
+  color:#94a3b8;
+  font-size:12px;
+}
+
+.active{color:#22c55e}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="back" onclick="goBack()">←</div>
+  <h3 id="subjectName">Subject</h3>
+</div>
+
+<div class="content">
+
+  <!-- Subject Info -->
+  <div class="card">
+    <div id="subjectTitle">Java</div>
+    <div class="small" id="subjectCode">CS101</div>
+
+    <div style="margin-top:10px">
+      <div class="small">Teacher</div>
+      <div id="teacher">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Phases -->
+  <div class="small" style="margin-bottom:10px;">Teaching Phases</div>
+
+  <div class="grid">
+    <div class="phase" onclick="openPhase('T1')">T1</div>
+    <div class="phase" onclick="openPhase('T2')">T2</div>
+    <div class="phase" onclick="openPhase('T3')">T3</div>
+    <div class="phase" onclick="openPhase('T4')">T4</div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <div onclick="goHome()">Home</div>
+  <div class="active">Subjects</div>
+  <div>Profile</div>
+</div>
+
+<script>
+// 📦 Get subject from previous page
+const subject = localStorage.getItem("subject");
+
+// Set UI
+document.getElementById("subjectName").innerText = subject;
+document.getElementById("subjectTitle").innerText = subject;
+
+// Static mapping (fast & simple)
+const subjectData = {
+  "Java": {code:"CS101", teacher:"Mr. Raj"},
+  "DBMS": {code:"CS102", teacher:"Ms. Priya"},
+  "Maths": {code:"MA101", teacher:"Dr. Shah"},
+  "Physics": {code:"PH101", teacher:"Mr. Patel"}
+};
+
+if(subjectData[subject]){
+  document.getElementById("subjectCode").innerText = subjectData[subject].code;
+  document.getElementById("teacher").innerText = subjectData[subject].teacher;
+}
+
+// 🔁 Navigation
+function goBack(){
+  window.history.back();
+}
+
+function goHome(){
+  window.location.href = "/dashboard.html";
+}
+
+// 👉 Open Phase
+function openPhase(phase){
+  localStorage.setItem("phase", phase);
+  window.location.href = "/chapter.html";
+}
+</script>
+
+</body>
+</html>
