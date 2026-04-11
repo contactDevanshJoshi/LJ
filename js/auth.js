@@ -13,9 +13,7 @@ window.login = async function () {
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    localStorage.setItem("student", JSON.stringify(docSnap.data()));
-    localStorage.setItem("enrollment", enrollment);
-    window.location.href = "dashboard.html";
+    window.location.href = `dashboard.html?enrollment=${enrollment}`;
   } else {
     alert("Student not found");
   }

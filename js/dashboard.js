@@ -1,12 +1,31 @@
 import { db } from "./firebase.js";
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, getDocs, query, where, doc, getDoc } 
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const student = JSON.parse(localStorage.getItem("student"));
+function getParam(param) {
+  return new URLSearchParams(window.location.search).get(param);
+}
 
-document.getElementById("studentName").innerText =
-  student.name + " (" + student.enrollment + ")";
+const enrollment = getParam("enrollment");
 
-async function loadSubjects() {
+async function loadStudent() {
+  const docRef = doc(db, "students", enrollment);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    alert("Student not found");
+    return;
+  }
+
+  const student = docSnap.data();
+
+  document.getElementById("studentName").innerText =
+    student.name + " (Enrollment: " + enrollment + ")";
+
+  loadSubjects(student);
+}
+
+async function loadSubjects(student) {
   const q = query(
     collection(db, "subjects"),
     where("semester", "==", student.semester),
@@ -14,14 +33,13 @@ async function loadSubjects() {
   );
 
   const snapshot = await getDocs(q);
-
   const container = document.getElementById("subjects");
 
-  snapshot.forEach(doc => {
-    const subject = doc.data();
+  snapshot.forEach(docSnap => {
+    const subject = docSnap.data();
 
     container.innerHTML += `
-      <div onclick="openSubject('${doc.id}')">
+      <div onclick="openSubject('${docSnap.id}')">
         <h3>${subject.name}</h3>
       </div>
     `;
@@ -29,8 +47,8 @@ async function loadSubjects() {
 }
 
 window.openSubject = function(subjectId) {
-  localStorage.setItem("subjectId", subjectId);
-  window.location.href = "quiz.html";
+  window.location.href =
+    `phase.html?enrollment=${enrollment}&subjectId=${subjectId}`;
 };
 
-loadSubjects();
+loadStudent();
