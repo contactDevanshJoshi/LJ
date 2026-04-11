@@ -1,54 +1,34 @@
 import { db } from "./firebase.js";
-import { collection, getDocs, query, where, doc, getDoc } 
+import { doc, getDoc, collection, getDocs, query, where } 
 from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-function getParam(param) {
-  return new URLSearchParams(window.location.search).get(param);
-}
+const url = new URLSearchParams(window.location.search);
+const enrollment = url.get("enrollment");
 
-const enrollment = getParam("enrollment");
+async function load() {
+  const s = await getDoc(doc(db, "students", enrollment));
+  const student = s.data();
 
-async function loadStudent() {
-  const docRef = doc(db, "students", enrollment);
-  const docSnap = await getDoc(docRef);
+  document.getElementById("name").innerText =
+    `${student.name} (${enrollment})`;
 
-  if (!docSnap.exists()) {
-    alert("Student not found");
-    return;
-  }
-
-  const student = docSnap.data();
-
-  document.getElementById("studentName").innerText =
-    student.name + " (Enrollment: " + enrollment + ")";
-
-  loadSubjects(student);
-}
-
-async function loadSubjects(student) {
   const q = query(
     collection(db, "subjects"),
     where("semester", "==", student.semester),
     where("department", "==", student.department)
   );
 
-  const snapshot = await getDocs(q);
-  const container = document.getElementById("subjects");
+  const snap = await getDocs(q);
 
-  snapshot.forEach(docSnap => {
-    const subject = docSnap.data();
-
-    container.innerHTML += `
-      <div onclick="openSubject('${docSnap.id}')">
-        <h3>${subject.name}</h3>
-      </div>
+  snap.forEach(d => {
+    document.getElementById("subjects").innerHTML += `
+      <div class="card" onclick="openSub('${d.id}')">${d.data().name}</div>
     `;
   });
 }
 
-window.openSubject = function(subjectId) {
-  window.location.href =
-    `phase.html?enrollment=${enrollment}&subjectId=${subjectId}`;
+window.openSub = (id) => {
+  window.location.href = `phase.html?enrollment=${enrollment}&subjectId=${id}`;
 };
 
-loadStudent();
+load();

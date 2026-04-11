@@ -1,75 +1,50 @@
 import { db } from "./firebase.js";
-import { doc, getDoc, addDoc, collection } 
+import { doc, getDoc, addDoc, collection, getDocs, query, where } 
 from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-let teacherData = null;
+let teacher = null;
 
-window.loginTeacher = async function () {
-  const teacherId = document.getElementById("teacherId").value;
-  const teacherKey = document.getElementById("teacherKey").value;
+window.loginTeacher = async () => {
+  const id = teacherId.value;
+  const key = teacherKey.value;
 
-  const docRef = doc(db, "teachers", teacherId);
-  const docSnap = await getDoc(docRef);
+  const snap = await getDoc(doc(db, "teachers", id));
 
-  if (!docSnap.exists()) {
-    alert("Teacher not found");
-    return;
-  }
+  if (!snap.exists()) return alert("Not found");
 
-  const data = docSnap.data();
+  const data = snap.data();
 
-  if (data.teacherKey !== teacherKey) {
-    alert("Wrong key");
-    return;
-  }
+  if (data.teacherKey !== key) return alert("Wrong");
 
-  teacherData = data;
+  teacher = data;
+  panel.style.display = "block";
 
-  document.getElementById("panel").style.display = "block";
+  loadScores();
 };
 
-window.addQuestion = async function () {
-  if (!teacherData) {
-    alert("Login first");
-    return;
-  }
-
-  const phase = document.getElementById("phase").value;
-  const chapterId = document.getElementById("chapterId").value;
-  const difficulty = document.getElementById("difficulty").value;
-
-  const question = document.getElementById("question").value;
-
-  const options = [
-    document.getElementById("opt1").value,
-    document.getElementById("opt2").value,
-    document.getElementById("opt3").value,
-    document.getElementById("opt4").value
-  ];
-
-  const correctAnswer = document.getElementById("correct").value;
-
+window.addQuestion = async () => {
   await addDoc(collection(db, "questions"), {
-    subjectId: teacherData.subjectId, // 🔥 auto from teacher
-    phase,
-    chapterId,
-    difficulty,
-    question,
-    options,
-    correctAnswer,
-    createdBy: "teacher"
+    subjectId: teacher.subjectId,
+    phase: phase.value,
+    chapterId: chapterId.value,
+    difficulty: difficulty.value,
+    question: question.value,
+    options: [opt1.value, opt2.value, opt3.value, opt4.value],
+    correctAnswer: correct.value
   });
 
-  alert("Question Added ✅");
+  alert("Added");
 };
 
-if (!phase || !difficulty || !question || options.includes("") || !correctAnswer) {
-  alert("Fill all fields properly");
-  return;
-}
+async function loadScores() {
+  const q = query(collection(db, "scores"),
+    where("subjectId", "==", teacher.subjectId));
 
-// match /questions/{id} {
-//   allow read: if true;
-//   allow write: if request.resource.data.createdBy == "teacher"
-//                || request.resource.data.adminKey == "SECRET123";
-// }
+  const snap = await getDocs(q);
+
+  snap.forEach(d => {
+    scores.innerHTML += `<div class="card">
+      ${d.data().enrollment} - ${d.data().score}/10
+    </div>`;
+  });
+}

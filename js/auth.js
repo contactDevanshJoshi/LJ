@@ -1,20 +1,12 @@
 import { db } from "./firebase.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-window.login = async function () {
+window.login = async () => {
   const enrollment = document.getElementById("enrollment").value;
 
-  if (!enrollment) {
-    alert("Enter Enrollment Number");
-    return;
-  }
+  const snap = await getDoc(doc(db, "students", enrollment));
 
-  const docRef = doc(db, "students", enrollment);
-  const docSnap = await getDoc(docRef);
+  if (!snap.exists()) return alert("Not found");
 
-  if (docSnap.exists()) {
-    window.location.href = `dashboard.html?enrollment=${enrollment}`;
-  } else {
-    alert("Student not found");
-  }
+  window.location.href = `dashboard.html?enrollment=${enrollment}`;
 };
