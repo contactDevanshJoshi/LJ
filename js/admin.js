@@ -55,3 +55,25 @@ window.addSubject = async function () {
 
   alert("Subject Added ✅");
 };
+
+window.addTeacher = async function () {
+  const teacherId = document.getElementById("teacherId").value;
+  const name = document.getElementById("teacherName").value;
+  const department = document.getElementById("teacherDept").value;
+  const subjectId = document.getElementById("teacherSubjectId").value;
+  const teacherKey = document.getElementById("teacherKey").value;
+
+  if (!teacherId || !name || !subjectId || !teacherKey) {
+    alert("Fill all required fields");
+    return;
+  }
+
+  await setDoc(doc(db, "teachers", teacherId), {
+    name,
+    department,
+    subjectId,
+    teacherKey
+  });
+
+  alert("Teacher Added ✅");
+};
