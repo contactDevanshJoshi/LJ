@@ -1,0 +1,7 @@
+body{font-family:Arial;background:#0b1120;color:#fff;margin:0}
+.container{padding:20px}
+.card{background:#1e293b;padding:15px;margin:10px;border-radius:12px}
+.login-container{max-width:300px;margin:100px auto;text-align:center}
+input{width:100%;padding:10px;margin:10px 0}
+button{padding:10px;border:none;background:#00c896;color:#fff;border-radius:8px}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
