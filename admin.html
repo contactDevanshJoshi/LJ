@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+</head>
+<body>
+
+<h2>Admin Login</h2>
+
+<input type="password" id="adminPass" placeholder="Enter Admin Password">
+<button onclick="checkAdmin()">Enter</button>
+
+<div id="adminPanel" style="display:none;">
+  <h3>Add Student</h3>
+
+  <input type="text" id="enroll" placeholder="Enrollment No"><br>
+  <input type="text" id="name" placeholder="Name"><br>
+  <input type="text" id="dept" placeholder="Department"><br>
+  <input type="text" id="sem" placeholder="Semester"><br>
+  <input type="text" id="hod" placeholder="HOD Name"><br>
+
+  <button onclick="addStudent()">Add Student</button>
+
+  <hr>
+
+  <h3>Add Subject</h3>
+
+  <input type="text" id="subName" placeholder="Subject Name"><br>
+  <input type="text" id="subDept" placeholder="Department"><br>
+  <input type="text" id="subSem" placeholder="Semester"><br>
+
+  <button onclick="addSubject()">Add Subject</button>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+
+</body>
+</html>
