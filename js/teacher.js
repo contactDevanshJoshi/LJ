@@ -63,6 +63,11 @@ window.addQuestion = async function () {
   alert("Question Added ✅");
 };
 
+if (!phase || !difficulty || !question || options.includes("") || !correctAnswer) {
+  alert("Fill all fields properly");
+  return;
+}
+
 // match /questions/{id} {
 //   allow read: if true;
 //   allow write: if request.resource.data.createdBy == "teacher"

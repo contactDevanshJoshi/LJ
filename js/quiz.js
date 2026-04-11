@@ -47,27 +47,25 @@ async function loadQuestions() {
 }
 
 function showQuestion() {
-  const q = questions[currentIndex];
+  let answered = false;
 
-  document.getElementById("question").innerText = q.question;
+q.options.forEach(opt => {
+  const btn = document.createElement("button");
+  btn.innerText = opt;
 
-  const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = "";
+  btn.onclick = () => {
+    if (answered) return; // 🔥 prevent multiple clicks
+    answered = true;
 
-  q.options.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.innerText = opt;
+    if (opt === q.correctAnswer) {
+      score++;
+      btn.style.background = "green";
+    } else {
+      btn.style.background = "red";
+    }
+  };
 
-    btn.onclick = () => {
-      if (opt === q.correctAnswer) {
-        score++;
-        btn.style.background = "green";
-      } else {
-        btn.style.background = "red";
-      }
-    };
-
-    optionsDiv.appendChild(btn);
+  optionsDiv.appendChild(btn);
   });
 }
 

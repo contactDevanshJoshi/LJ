@@ -77,3 +77,39 @@ window.addTeacher = async function () {
 
   alert("Teacher Added ✅");
 };
+
+window.addPhase = async function () {
+  const subjectId = document.getElementById("phaseSubjectId").value;
+  const phase = document.getElementById("phaseName").value;
+
+  if (!subjectId || !phase) {
+    alert("Fill all fields");
+    return;
+  }
+
+  await addDoc(collection(db, "teachingPhases"), {
+    subjectId,
+    phase
+  });
+
+  alert("Phase Added ✅");
+};
+
+window.addChapter = async function () {
+  const subjectId = document.getElementById("chapterSubjectId").value;
+  const phase = document.getElementById("chapterPhase").value;
+  const name = document.getElementById("chapterName").value;
+
+  if (!subjectId || !phase || !name) {
+    alert("Fill all fields");
+    return;
+  }
+
+  await addDoc(collection(db, "chapters"), {
+    subjectId,
+    phase,
+    name
+  });
+
+  alert("Chapter Added ✅");
+};
