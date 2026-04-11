@@ -63,8 +63,8 @@ window.addQuestion = async function () {
   alert("Question Added ✅");
 };
 
-match /questions/{id} {
-  allow read: if true;
-  allow write: if request.resource.data.createdBy == "teacher"
-               || request.resource.data.adminKey == "SECRET123";
-}
+// match /questions/{id} {
+//   allow read: if true;
+//   allow write: if request.resource.data.createdBy == "teacher"
+//                || request.resource.data.adminKey == "SECRET123";
+// }
