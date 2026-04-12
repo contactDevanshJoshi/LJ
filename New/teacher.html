@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:#0f172a;
+  color:#fff;
+}
+
+/* Header */
+.header{
+  padding:20px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+/* Container */
+.container{
+  padding:20px;
+  padding-bottom:100px;
+}
+
+/* Form */
+.form{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:20px;
+}
+
+.input, select, textarea{
+  width:100%;
+  margin-bottom:10px;
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  background:#0f172a;
+  color:#fff;
+}
+
+textarea{resize:none;height:80px}
+
+/* Button */
+.btn{
+  width:100%;
+  padding:12px;
+  background:#22c55e;
+  border:none;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* Question List */
+.question-list{
+  margin-top:10px;
+}
+
+.question-card{
+  background:#1e293b;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.question-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.question-text{
+  font-weight:600;
+  font-size:14px;
+}
+
+.delete{
+  cursor:pointer;
+  color:red;
+}
+
+/* Badges */
+.meta{
+  margin-top:6px;
+  font-size:12px;
+  color:#94a3b8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>Teacher Panel</h2>
+</div>
+
+<div class="container">
+
+  <!-- FORM -->
+  <div class="form">
+    <select id="subject">
+      <option value="">Select Subject</option>
+      <option value="math">Math</option>
+      <option value="physics">Physics</option>
+    </select>
+
+    <select id="chapter">
+      <option value="">Select Chapter</option>
+      <option value="ch1">Chapter 1</option>
+      <option value="ch2">Chapter 2</option>
+    </select>
+
+    <select id="difficulty">
+      <option value="">Difficulty</option>
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+
+    <textarea id="question" placeholder="Enter question"></textarea>
+
+    <input id="a" class="input" placeholder="Option A">
+    <input id="b" class="input" placeholder="Option B">
+    <input id="c" class="input" placeholder="Option C">
+    <input id="d" class="input" placeholder="Option D">
+
+    <select id="correct">
+      <option value="">Correct Answer</option>
+      <option value="0">A</option>
+      <option value="1">B</option>
+      <option value="2">C</option>
+      <option value="3">D</option>
+    </select>
+
+    <button class="btn" onclick="addQuestion()">Add Question</button>
+  </div>
+
+  <!-- LIST -->
+  <div class="question-list" id="list"></div>
+
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ➕ Add Question
+window.addQuestion = async function(){
+
+  const subject = document.getElementById("subject").value;
+  const chapter = document.getElementById("chapter").value;
+  const difficulty = document.getElementById("difficulty").value;
+  const question = document.getElementById("question").value;
+
+  const options = [
+    document.getElementById("a").value,
+    document.getElementById("b").value,
+    document.getElementById("c").value,
+    document.getElementById("d").value
+  ];
+
+  const correct = document.getElementById("correct").value;
+
+  if(!subject || !chapter || !difficulty || !question || options.includes("") || correct===""){
+    alert("Fill all fields");
+    return;
+  }
+
+  await addDoc(collection(db,"questions"),{
+    subject,
+    chapter,
+    difficulty,
+    question,
+    options,
+    correct
+  });
+
+  alert("Question Added ✅");
+  loadQuestions();
+};
+
+// 📥 Load Questions
+async function loadQuestions(){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  const snap = await getDocs(collection(db,"questions"));
+
+  snap.forEach(docSnap=>{
+    const q = docSnap.data();
+
+    list.innerHTML += `
+      <div class="question-card">
+        <div class="question-header">
+          <div class="question-text">${q.question}</div>
+          <div class="delete" onclick="deleteQ('${docSnap.id}')">🗑</div>
+        </div>
+        <div class="meta">
+          ${q.subject} | ${q.chapter} | ${q.difficulty}
+        </div>
+      </div>
+    `;
+  });
+}
+
+// 🗑 Delete
+window.deleteQ = async function(id){
+  await deleteDoc(doc(db,"questions",id));
+  loadQuestions();
+};
+
+// 🔁 Init
+loadQuestions();
+</script>
+
+</body>
+</html>
