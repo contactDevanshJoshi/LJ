@@ -28,7 +28,7 @@ body{
   padding-bottom:100px;
 }
 
-/* Form */
+/* Card/Form */
 .form{
   background:#1e293b;
   padding:20px;
@@ -46,7 +46,7 @@ body{
   color:#fff;
 }
 
-textarea{resize:none;height:80px}
+textarea{height:80px;resize:none}
 
 /* Button */
 .btn{
@@ -59,11 +59,7 @@ textarea{resize:none;height:80px}
   cursor:pointer;
 }
 
-/* Question List */
-.question-list{
-  margin-top:10px;
-}
-
+/* Question list */
 .question-card{
   background:#1e293b;
   padding:14px;
@@ -74,24 +70,17 @@ textarea{resize:none;height:80px}
 .question-header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-}
-
-.question-text{
-  font-weight:600;
-  font-size:14px;
 }
 
 .delete{
-  cursor:pointer;
   color:red;
+  cursor:pointer;
 }
 
-/* Badges */
 .meta{
-  margin-top:6px;
   font-size:12px;
   color:#94a3b8;
+  margin-top:6px;
 }
 </style>
 </head>
@@ -104,16 +93,25 @@ textarea{resize:none;height:80px}
 
 <div class="container">
 
-  <!-- FORM -->
+  <!-- CSV Upload -->
   <div class="form">
+    <h3 style="margin-bottom:10px;">Upload Questions CSV</h3>
+    <input type="file" id="csvFile" accept=".csv">
+    <button class="btn" onclick="uploadCSV()">Upload CSV</button>
+  </div>
+
+  <!-- Manual Add -->
+  <div class="form">
+    <h3 style="margin-bottom:10px;">Add Question</h3>
+
     <select id="subject">
-      <option value="">Select Subject</option>
+      <option value="">Subject</option>
       <option value="math">Math</option>
       <option value="physics">Physics</option>
     </select>
 
     <select id="chapter">
-      <option value="">Select Chapter</option>
+      <option value="">Chapter</option>
       <option value="ch1">Chapter 1</option>
       <option value="ch2">Chapter 2</option>
     </select>
@@ -125,12 +123,12 @@ textarea{resize:none;height:80px}
       <option value="hard">Hard</option>
     </select>
 
-    <textarea id="question" placeholder="Enter question"></textarea>
+    <textarea id="question" placeholder="Question"></textarea>
 
-    <input id="a" class="input" placeholder="Option A">
-    <input id="b" class="input" placeholder="Option B">
-    <input id="c" class="input" placeholder="Option C">
-    <input id="d" class="input" placeholder="Option D">
+    <input id="a" placeholder="Option A">
+    <input id="b" placeholder="Option B">
+    <input id="c" placeholder="Option C">
+    <input id="d" placeholder="Option D">
 
     <select id="correct">
       <option value="">Correct Answer</option>
@@ -143,8 +141,8 @@ textarea{resize:none;height:80px}
     <button class="btn" onclick="addQuestion()">Add Question</button>
   </div>
 
-  <!-- LIST -->
-  <div class="question-list" id="list"></div>
+  <!-- Question List -->
+  <div id="list"></div>
 
 </div>
 
@@ -169,22 +167,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ➕ Add Question
+// ➕ Add Manual Question
 window.addQuestion = async function(){
 
-  const subject = document.getElementById("subject").value;
-  const chapter = document.getElementById("chapter").value;
-  const difficulty = document.getElementById("difficulty").value;
-  const question = document.getElementById("question").value;
+  const subject = subjectEl.value;
+  const chapter = chapterEl.value;
+  const difficulty = difficultyEl.value;
+  const question = questionEl.value;
 
-  const options = [
-    document.getElementById("a").value,
-    document.getElementById("b").value,
-    document.getElementById("c").value,
-    document.getElementById("d").value
-  ];
-
-  const correct = document.getElementById("correct").value;
+  const options = [aEl.value,bEl.value,cEl.value,dEl.value];
+  const correct = correctEl.value;
 
   if(!subject || !chapter || !difficulty || !question || options.includes("") || correct===""){
     alert("Fill all fields");
@@ -192,16 +184,46 @@ window.addQuestion = async function(){
   }
 
   await addDoc(collection(db,"questions"),{
-    subject,
-    chapter,
-    difficulty,
-    question,
-    options,
-    correct
+    subject, chapter, difficulty, question, options, correct
   });
 
-  alert("Question Added ✅");
+  alert("Added ✅");
   loadQuestions();
+};
+
+// 📤 CSV Upload
+window.uploadCSV = function(){
+  const file = document.getElementById("csvFile").files[0];
+
+  if(!file){
+    alert("Select CSV");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async function(e){
+    const rows = e.target.result.split("\n").map(r=>r.split(","));
+
+    for(let i=1;i<rows.length;i++){
+      const r = rows[i];
+      if(r.length<9) continue;
+
+      await addDoc(collection(db,"questions"),{
+        subject:r[0],
+        chapter:r[1],
+        difficulty:r[2],
+        question:r[3],
+        options:[r[4],r[5],r[6],r[7]],
+        correct:r[8]
+      });
+    }
+
+    alert("CSV Uploaded ✅");
+    loadQuestions();
+  };
+
+  reader.readAsText(file);
 };
 
 // 📥 Load Questions
@@ -217,12 +239,10 @@ async function loadQuestions(){
     list.innerHTML += `
       <div class="question-card">
         <div class="question-header">
-          <div class="question-text">${q.question}</div>
+          <div>${q.question}</div>
           <div class="delete" onclick="deleteQ('${docSnap.id}')">🗑</div>
         </div>
-        <div class="meta">
-          ${q.subject} | ${q.chapter} | ${q.difficulty}
-        </div>
+        <div class="meta">${q.subject} | ${q.chapter} | ${q.difficulty}</div>
       </div>
     `;
   });
@@ -234,8 +254,20 @@ window.deleteQ = async function(id){
   loadQuestions();
 };
 
-// 🔁 Init
+// Cache elements
+const subjectEl = document.getElementById("subject");
+const chapterEl = document.getElementById("chapter");
+const difficultyEl = document.getElementById("difficulty");
+const questionEl = document.getElementById("question");
+const aEl = document.getElementById("a");
+const bEl = document.getElementById("b");
+const cEl = document.getElementById("c");
+const dEl = document.getElementById("d");
+const correctEl = document.getElementById("correct");
+
+// Init
 loadQuestions();
+
 </script>
 
 </body>
